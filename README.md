@@ -1,1 +1,1 @@
-# ml-vit-events
+# Machine learning project for ViT extracted features for cardiovascular events prediction
