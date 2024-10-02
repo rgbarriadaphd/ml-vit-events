@@ -3,6 +3,12 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Dataset files
+*.csv
+
+# Project folders
+input/sanity_check
+
 # C extensions
 *.so
 
