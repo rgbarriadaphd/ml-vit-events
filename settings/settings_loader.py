@@ -17,3 +17,4 @@ class Settings:
 
     def get_global_settings(self):
         return self.config
+

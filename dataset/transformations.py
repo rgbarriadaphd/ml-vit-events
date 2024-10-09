@@ -52,7 +52,7 @@ class Normalization(BaseTransform):
 
 class Outliers(BaseTransform):
     def __init__(self, threshold: float = 10):
-        print(f"Outliers threshold: {threshold}")
+        # print(f"Outliers threshold: {threshold}")
         self.threshold = threshold
 
     def local_transformation(self, df):
@@ -96,12 +96,12 @@ class DataFrameTransform:
     def apply_transform(self, df):
         for transform, is_active in self._arguments.items():
             if is_active:
-                print(f"Applying {transform}...")
+                # print(f"Applying {transform}...")
                 df = self._transforms[transform].apply(df)
         # Delete rows with nan values in columns with name starting in 'x'
         nan_rows = df[df.columns[df.columns.str.startswith('x')]].isna().any(axis=1)
         df = df[~nan_rows]
-        print(f"Removed {sum(nan_rows)} rows because of nan values in columns with name starting in 'x'")
+        # print(f"Removed {sum(nan_rows)} rows because of nan values in columns with name starting in 'x'")
         return df
 
 

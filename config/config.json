@@ -1,34 +1,84 @@
 {
+    "experiment": "comparison",
     "dataset": {
         "path": "input/vit_features_clinical_baseline.csv",
         "transform": {
             "standardization": false,
-            "normalization": false,
+            "normalization": true,
             "outliers": false,
             "collinear": false,
             "relevant": false
         }
     },
     "settings": ["ALL","NO RD","RD"],
+    "settings2": ["ALL","NO RD","RD"],
+    "methods": ["base", "balanced", "smote"],
+    "methods2": ["base", "balanced", "smote"],
     "parameters": {
         "test_size": 0.3,
-        "n_folds": 5,
-        "random_state": 42
+        "n_folds": 10,
+        "random_state": 14,
+        "balance_classes": false,
+        "smote": false
     },
     "classifiers": {
         "logistic_regression": {
+            "run": true,
             "penalty": "l2",
             "C": 1.0,
-            "solver": "liblinear"
+            "solver": "liblinear",
+            "random_state": 0,
+            "multi_class": "auto",
+            "max_iter": 1000        },
+        "svm": {
+            "run": true,
+            "kernel": "rbf",
+            "C": 1.0,
+            "gamma": "scale"
+        },
+        "knn": {
+            "run": true,
+            "n_neighbors":9,
+            "algorithm":"auto",
+            "p":1
+        },
+        "gaussian_process": {
+            "run": true,
+            "optimizer": "fmin_l_bfgs_b"
+        },
+        "decision_tree": {
+            "run": true,
+            "max_depth": 20,
+            "criterion": "entropy",
+            "min_samples_leaf": 2,
+            "min_samples_split": 4
         },
         "random_forest": {
+            "run": true,
             "n_estimators": 100,
-            "max_depth": 5,
-            "random_state": 42
+            "max_depth": 30,
+            "bootstrap": false,
+            "min_samples_leaf": 2,
+            "min_samples_split": 5
         },
-        "svc": {
-            "kernel": "linear",
-            "C": 1.0
+        "ada_boost": {
+            "run": true,
+            "n_estimators": 50,
+            "learning_rate": 1.0
+        },
+        "quadratic_classifier": {
+            "run": true,
+            "reg_param": 0.1
+        },
+        "naive_bayes": {
+            "run": true,
+            "var_smoothing": 1e-9,
+            "priors": [ 0.3, 0.7]
+        },
+        "mlp": {
+            "run": true,
+            "hidden_layer_sizes": [100],
+            "max_iter": 1500
         }
     }
 }
