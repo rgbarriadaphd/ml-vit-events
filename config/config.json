@@ -2,6 +2,7 @@
     "experiment": "comparison",
     "dataset": {
         "path": "input/vit_features_clinical_baseline.csv",
+        "folds": "input/cross_validation",
         "transform": {
             "standardization": false,
             "normalization": true,
@@ -11,9 +12,6 @@
         }
     },
     "settings": ["ALL","NO RD","RD"],
-    "settings2": ["ALL","NO RD","RD"],
-    "methods": ["base", "balanced", "smote"],
-    "methods2": ["base", "balanced", "smote"],
     "parameters": {
         "test_size": 0.3,
         "n_folds": 10,
@@ -27,7 +25,6 @@
             "penalty": "l2",
             "C": 1.0,
             "solver": "liblinear",
-            "random_state": 0,
             "multi_class": "auto",
             "max_iter": 1000        },
         "svm": {

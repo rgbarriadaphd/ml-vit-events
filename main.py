@@ -6,20 +6,8 @@
 
 Description: Entry point for ml-vit-events
 """
-from dataset.loader import EventsFeaturesDataLoader
-from settings.settings_loader import Settings
-from classification.predict_agent import PredictAgent
-
+from classification.predict_agent import PredictImageFeaturesAgent
 
 if __name__ == '__main__':
-    # Import configuration
-    settings = Settings('config/config.json')
-
-    # Load dataset and apply transforms if defined
-    dataframe = EventsFeaturesDataLoader(settings).get()
-
-    # Run predictions
-    agent = PredictAgent(settings, dataframe)
-    results = agent.run()
-
-
+    agent = PredictImageFeaturesAgent('config/config.json')
+    agent.run()

@@ -59,7 +59,7 @@ class MLClassifier(ABC):
 
     def evaluate(self, X: pd.DataFrame, y: pd.DataFrame, fold: int,
                  train_counts: tuple[int], test_counts: tuple[int],
-                 clf_name: str, setting: str,balanced_method: str,
+                 clf_name: str, setting: str,
                  results_df: pd.DataFrame) -> pd.DataFrame:
         # make model predictions
         predictions = self.predict(X)
@@ -67,7 +67,6 @@ class MLClassifier(ABC):
             'fold': fold,
             'classifier': clf_name,
             'setting': setting,
-            'method': balanced_method,
             'train_n': train_counts[0],
             'train_control': train_counts[1],
             'train_event': train_counts[2],
