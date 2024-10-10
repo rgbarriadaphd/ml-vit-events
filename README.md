@@ -1,1 +1,3 @@
 # Machine learning project for ViT extracted features for cardiovascular events prediction
+
+This project aims to develop a machine learning-based approach for predicting cardiovascular events using features extracted from medical images. The project utilizes a range of classification algorithms and techniques to handle class imbalance, with a focus on model evaluation and comparison. The goal is to identify the most effective approach for predicting cardiovascular events and provide insights into the underlying factors contributing to these events.
