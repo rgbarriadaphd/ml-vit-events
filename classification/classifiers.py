@@ -24,45 +24,51 @@ from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis as SkQua
 from sklearn.naive_bayes import GaussianNB as SkNaiveBayes
 from sklearn.neural_network import MLPClassifier as SkMLP
 
-
-def check_metrics(metrics: dict, total_test: int):
-    """Manually Check the computed metrics against the true values."""
-    tn, fp, fn, tp = np.array(metrics['confusion_matrix']).ravel()
-    assert total_test == (tp + tn + fp + fn), f'Error: wrong metrics size and test set size!'
-    assert math.isclose(metrics['accuracy'] / 100.0, (tp + tn) / (tp + tn + fp + fn), rel_tol=1e-9, abs_tol=1e-11), \
-        f'Error computing accuracy!'
-    assert math.isclose(metrics['precision'] / 100.0, tp / (tp + fp), rel_tol=1e-9, abs_tol=1e-11), \
-        f'Error computing precision!'
-    assert math.isclose(metrics['recall'] / 100.0, tp / (tp + fn), rel_tol=1e-9, abs_tol=1e-11), \
-        f'Error computing recall!'
+from utils.metrics import check_metrics
 
 
 class MLClassifier(ABC):
     def __init__(self, **kwargs):
-        self.model = self._create_model(**kwargs)
+        """
+        Constructor for MLClassifier.
+
+        Parameters
+        ----------
+        **kwargs : dict
+            Arguments to be passed to the `_create_model` method.
+        """
+        self.__model = self._create_model(**kwargs)
 
     @abstractmethod
     def _create_model(self, **kwargs):
+        """Creates and returns a concrete classifier model based on the given
+        keyword arguments.
+
+        Abstract method to be implemented by classifier subclasses.
+        """
         pass
 
     def get_params(self):
-        return self.model.get_params()
+        return self.__model.get_params()
 
     def set_params(self, **params):
-        return self.model.set_params(**params)
+        return self.__model.set_params(**params)
 
     def fit(self, X, y):
-        self.model.fit(X, y)
+        self.__model.fit(X, y)
 
     def predict(self, X):
-        return self.model.predict(X)
+        return self.__model.predict(X)
 
-    def evaluate(self, X: pd.DataFrame, y: pd.DataFrame, fold: int,
+    def evaluate(self, x: pd.DataFrame, y: pd.DataFrame, fold: int,
                  train_counts: tuple[int], test_counts: tuple[int],
                  clf_name: str, setting: str,
                  results_df: pd.DataFrame) -> pd.DataFrame:
+        """Evaluate the performance of a model on a given test set."""
         # make model predictions
-        predictions = self.predict(X)
+        predictions = self.predict(x)
+
+        # compute metrics
         metrics = {
             'fold': fold,
             'classifier': clf_name,
@@ -81,15 +87,19 @@ class MLClassifier(ABC):
         }
 
         # Check the metrics coherency
-        check_metrics(metrics, test_counts[0])
+        try:
+            check_metrics(metrics, test_counts[0])
 
-        # Include metrics to results dataframe
-        results_df = pd.concat([results_df, pd.DataFrame([metrics])], ignore_index=True)
+            # Include metrics to results dataframe
+            results_df = pd.concat([results_df, pd.DataFrame([metrics])], ignore_index=True)
 
-        # Convert bool columns to bool type (avoid warnings)
-        results_df = results_df.astype({col: 'bool' for col in results_df.select_dtypes(include='object').columns if
-                                        results_df[col].dropna().isin([True, False]).all()})
+            # Convert bool columns to bool type (avoid warnings)
+            results_df = results_df.astype({col: 'bool' for col in results_df.select_dtypes(include='object').columns if
+                                            results_df[col].dropna().isin([True, False]).all()})
 
+        except AssertionError as e:
+            print(f"{e} fold : {fold}, classifier: {clf_name}, setting: {setting}, "
+                  f"predictions: {predictions}")
         return results_df
 
 

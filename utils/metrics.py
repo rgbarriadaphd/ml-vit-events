@@ -6,6 +6,8 @@
 
 Description: Module to implement metrics for model evaluation
 """
+import math
+
 import numpy as np
 from scipy import stats
 
@@ -81,3 +83,29 @@ def get_metrics(metric_list, confidence=0.95):
         ci = t_value * std_err
 
     return mean, std, (mean - ci, mean + ci)
+
+
+def check_metrics(metrics: dict, total_test: int):
+    """
+    Manually Check the computed metrics against the true values.
+
+    This function checks if the computed metrics (accuracy, precision, recall) from a
+    classification model match the expected values based on the confusion matrix.
+
+    It ensures that:
+
+        - The total test size matches the sum of true positives (tp), true negatives (tn), false positives (fp),
+            and false negatives (fn).
+        - The computed accuracy, precision, and recall values are close to the expected values calculated from
+            the confusion matrix, within a small tolerance.
+        - The function raises an AssertionError if any of these checks fail, indicating an error in computing
+            the metrics.
+    """
+    tn, fp, fn, tp = np.array(metrics['confusion_matrix']).ravel()
+    assert total_test == (tp + tn + fp + fn), f'Error: wrong metrics size and test set size!'
+    assert math.isclose(metrics['accuracy'] / 100.0, (tp + tn) / (tp + tn + fp + fn), rel_tol=1e-9, abs_tol=1e-11), \
+        f'Error computing accuracy!'
+    assert math.isclose(metrics['precision'] / 100.0, tp / (tp + fp), rel_tol=1e-9, abs_tol=1e-11), \
+        f'Error computing precision!'
+    assert math.isclose(metrics['recall'] / 100.0, tp / (tp + fn), rel_tol=1e-9, abs_tol=1e-11), \
+        f'Error computing recall!'

@@ -6,8 +6,9 @@
 
 Description: Entry point for ml-vit-events
 """
-from classification.predict_agent import PredictImageFeaturesAgent
+from classification.predict_agent import PredictAgentFactory
 
 if __name__ == '__main__':
-    agent = PredictImageFeaturesAgent('config/config.json')
+    agent = PredictAgentFactory.get_agent(mode='clinical',
+                                          config='config/config.json')
     agent.run()

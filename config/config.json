@@ -1,20 +1,28 @@
 {
-    "experiment": "comparison",
+    "experiment": "test_clinical_data",
     "dataset": {
         "path": "input/vit_features_clinical_baseline.csv",
         "folds": "input/cross_validation",
+        "target": "event",
         "transform": {
             "standardization": false,
             "normalization": true,
             "outliers": false,
             "collinear": false,
             "relevant": false
+        },
+        "clinical": {
+            "non_relevant": ["ecbv", "aei", "ci"],
+            "relevant": ["dl", "obe", "tab", "fa", "hta", "ic"],
+            "numerical": ["age"],
+            "trainable": ["gender", "dl", "obe", "tab", "fa", "hta", "ic", "age", "rd"]
         }
     },
     "settings": ["ALL","NO RD","RD"],
+    "settings2": ["ALL","NO RD","RD"],
     "parameters": {
         "test_size": 0.3,
-        "n_folds": 10,
+        "n_folds": 20,
         "random_state": 14,
         "balance_classes": false,
         "smote": false
@@ -54,7 +62,7 @@
             "run": true,
             "n_estimators": 100,
             "max_depth": 30,
-            "bootstrap": false,
+            "bootstrap": true,
             "min_samples_leaf": 2,
             "min_samples_split": 5
         },
