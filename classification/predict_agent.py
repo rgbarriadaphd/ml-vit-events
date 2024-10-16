@@ -157,7 +157,69 @@ class PredictBaseAgent(ABC):
 
 
 class PredictMultiModalAgent(PredictBaseAgent):
-    pass
+    def __init__(self, config_path: str):
+        # Get protected config from base class
+        super().__init__(config_path)
+        self.__config = super().get_config()
+        self.__mode = self.__config["dataset"]["mm_mode"]
+
+    def _clean_clinical_data(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Given a dataframe with both ViT features and clinical data
+        and delete columns not relevant in the clinical case.
+
+        Also, remove columns with missing values, cast categorical variables to
+        integers and scale numerical variables.
+        """
+        df_base = df.copy()
+
+        if self.__mode == 'patient':
+            # The dataset contains several images for each patient, but the clinical data is the same.
+            # Keep just one row per patient
+            df_base = df_base.drop_duplicates(subset='pid', keep='first')
+
+        # Delete image column (id) which is not relevant in the clinical case.
+        df_base = df_base.drop(columns='id')
+
+        # We know some variables are not relevant since does not provide differentiation information. Remove them
+        df_base = df_base.drop(self.__config["dataset"]["clinical"]["non_relevant"], axis=1)
+
+        # Remove columns with missing values
+        df_base = df_base.dropna()
+
+        # For numerical sake, cast categorical variables to integers
+        df_cleaned = df_base.copy()
+        df_cleaned[self.__config["dataset"]["clinical"]["relevant"]] = \
+            df_cleaned[self.__config["dataset"]["clinical"]["relevant"]].astype(int)
+
+        # Scale numerical variable. Age is the only case in this dataset.
+        scaler = MinMaxScaler()
+        df_cleaned[self.__config["dataset"]["clinical"]["numerical"]] = scaler.fit_transform(
+            df_cleaned[self.__config["dataset"]["clinical"]["numerical"]])
+
+        return df_cleaned
+
+    def _filter_usable_data(self, df: pd.DataFrame) -> (pd.DataFrame, pd.DataFrame):
+        """Filter usable features and clinical data from the data from the given dataframe."""
+        x = df.drop(self.__config["dataset"]["target"], axis=1)
+        y = df[self.__config["dataset"]["target"]]
+        return x, y
+
+    def _retrieve_train_test_data(self, fid: int) -> (pd.DataFrame, pd.DataFrame):
+        """Retrieves the train and test data for a given fold id."""
+
+        # Load train and test data
+        train_df = pd.read_csv(os.path.join(self.__config["dataset"]["folds"], f'train_{fid}.csv'))
+        test_df = pd.read_csv(os.path.join(self.__config["dataset"]["folds"], f'test_{fid}.csv'))
+
+        train_df = self._clean_clinical_data(train_df)
+        test_df = self._clean_clinical_data(test_df)
+
+        if self.__mode == 'selection':
+            train_df = train_df[self.__config["dataset"]["features_selected"]]
+            test_df = test_df[self.__config["dataset"]["features_selected"]]
+
+        return train_df, test_df
 
 
 class PredictClinicalDataAgent(PredictBaseAgent):
@@ -166,7 +228,7 @@ class PredictClinicalDataAgent(PredictBaseAgent):
         super().__init__(config_path)
         self.__config = super().get_config()
 
-    def _clean_for_clinical_process(self, df: pd.DataFrame) -> pd.DataFrame:
+    def _clean_clinical_data(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Given a dataframe with both ViT features and clinical data, keep only
         the clinical data, remove duplicate rows (keep just one row per patient)
@@ -214,8 +276,8 @@ class PredictClinicalDataAgent(PredictBaseAgent):
         train_df = pd.read_csv(os.path.join(self.__config["dataset"]["folds"], f'train_{fid}.csv'))
         test_df = pd.read_csv(os.path.join(self.__config["dataset"]["folds"], f'test_{fid}.csv'))
 
-        train_df = self._clean_for_clinical_process(train_df)
-        test_df = self._clean_for_clinical_process(test_df)
+        train_df = self._clean_clinical_data(train_df)
+        test_df = self._clean_clinical_data(test_df)
 
         return train_df, test_df
 
@@ -246,7 +308,7 @@ class PredictImageFeaturesAgent(PredictBaseAgent):
 
 class PredictAgentFactory:
     @staticmethod
-    def get_agent(mode, config):
+    def get_agent(mode: str, config: str):
         """Factory method to create a PredictAgent instance based on the given mode."""
         if mode == "features":
             return PredictImageFeaturesAgent(config)

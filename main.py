@@ -9,6 +9,6 @@ Description: Entry point for ml-vit-events
 from classification.predict_agent import PredictAgentFactory
 
 if __name__ == '__main__':
-    agent = PredictAgentFactory.get_agent(mode='clinical',
+    agent = PredictAgentFactory.get_agent(mode='multimodal',
                                           config='config/config.json')
     agent.run()

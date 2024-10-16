@@ -1,9 +1,12 @@
 {
-    "experiment": "test_clinical_data",
+    "experiment": "test_multimodal_baseline_last",
     "dataset": {
         "path": "input/vit_features_clinical_baseline.csv",
         "folds": "input/cross_validation",
         "target": "event",
+        "mm_mode": "baseline",
+        "mm_mode2": ["baseline","patient","selection"],
+        "features_selected": ["event", "rd","gender", "obe", "tab", "fa", "ic", "x4", "x84", "x91", "x180", "x201", "x232", "x290", "x314", "x334", "x346", "x468", "x476", "x522", "x535", "x628", "x635", "x692", "x787", "x816", "x846", "x857", "x896", "x904", "x929", "x963"],
         "transform": {
             "standardization": false,
             "normalization": true,
